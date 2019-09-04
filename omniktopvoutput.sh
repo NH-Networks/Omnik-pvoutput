@@ -25,7 +25,7 @@ minute=`date '+%H:%M'`
 find $logpath/ -type f -mtime +3 -exec rm {} \;
 
 # please change with correct location (Netherlands support only)
-temp1=$(curl -s http://weerlive.nl/api/json-10min.php?locatie=Almelo | grep 'temp' | cut -d : -f 4 | cut -d , -f 1 | sed 's/"//g')
+temp1=$(curl -s http://weerlive.nl/api/json-10min.php?locatie=Amsterdam | grep 'temp' | cut -d : -f 4 | cut -d , -f 1 | sed 's/"//g')
 temp=$(echo $temp1 | sed 's/[^0-9.]*//g')
 
 # if temp var is empty for some reason, temp will be set to 99.
