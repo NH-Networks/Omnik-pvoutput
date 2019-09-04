@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # variables
-ip=10.10.32.1
+ip=10.10.32.1    # local ip address of inverter
 logpath='/mnt/USB16GB/omnik/logs'
 
 #Wait for Omnik Inverter to be online (Change to you own inverter ip address)
