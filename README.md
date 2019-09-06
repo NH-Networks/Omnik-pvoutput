@@ -1,5 +1,5 @@
 # Omnik-pvoutput
-Upload data from inverter status.js to pvoutput
+Upload data (current output and Total output of today) from inverter status.js to pvoutput 
 
 Change the value's in script to match your inverter.
 
