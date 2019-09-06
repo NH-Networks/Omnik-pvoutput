@@ -9,7 +9,7 @@ logpath=/mnt/USB16GB/omnik/logs
 # please change with correct sid and key from pvoutput.org account
 sid=99999
 key=c393599e8251e497da5c51c9xxxxxxxxxxxxxxxx
-# please change to your location
+# please change to your weather location (Only Netherlands Support)
 location=Almelo
 
 # Functions
