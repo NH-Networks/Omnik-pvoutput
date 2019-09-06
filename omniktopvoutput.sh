@@ -1,23 +1,30 @@
 #!/bin/bash
 #
 # Variables
-zerocheck=/opt/omnik/.zerocheck
+# Set wirepush id 
+wpid=xxxx
+zerocheck=/opt/omnik/.zerocheck #used to check for lastupdate in case of zero output.
 inverterip=10.10.32.1
 logpath=/mnt/USB16GB/omnik/logs
-wirepusherid=xxxx
 # please change with correct sid and key from pvoutput.org account
-sid=XXXX
-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+sid=99999
+key=c393599e8251e497da5c51c9xxxxxxxxxxxxxxxx
 # please change to your location
-location=Amsterdam
+location=Almelo
 
 # Functions
+getpostdatastring () {
+	# postdata String, change value's to match inverters output on status.js
+	# NLDNXXXXXXXXXXXX,NL1-V1.0-XXXX-4,V2.0-XXXX,omnikXXXXtl ,X000,1070,790,160839,,1,
+	postdatastring="${auth}&v1=$powertoday&v2=${Array[5]}&v5=$temp&t=$minute&d=$today"	
+}
+
 postdata () {
 	if [ -f "$zerocheck" ]; then
 		rm -f $zerocheck
 	fi
-	postdatastring="${auth}&v2=${Array[5]}&v5=$temp&t=$minute&d=$today"
-	echo "Running normal and posting data to pvoutput. Output power is ${Array[5]} Watt. outside Temp. is $temp ℃."
+	getpostdatastring
+	echo "Running normal and posting data to pvoutput. Output power is ${Array[5]} Watt. outside Temp. is $temp Degrees."
 	echo -n "$today $minute " >> "$logpath/$today-omniktopvoutput.log"
 	curl -s "http://pvoutput.org/service/r2/addstatus.jsp?$postdatastring" >> "$logpath/$today-omniktopvoutput.log"
 	echo "" >> "$logpath/$today-omniktopvoutput.log"
@@ -25,7 +32,7 @@ postdata () {
 }
 
 lastpostdata () {
-	postdatastring="${auth}&v2=${Array[5]}&v5=$temp&t=$minute&d=$today"
+	getpostdatastring
 	echo "$zerocheck does not exist, post last 0 output to pvoutput"
 	echo -n "$today $minute " >> "$logpath/$today-omniktopvoutput.log"
 	curl -s "http://pvoutput.org/service/r2/addstatus.jsp?$postdatastring" >> "$logpath/$today-omniktopvoutput.log"
@@ -69,7 +76,7 @@ echo "Inverter Online!"
 today=`date '+%Y%m%d'`
 minute=`date '+%H:%M'`
 
-find $logpath -type f -mtime +3 -exec rm {} \;
+find $logpath/ -type f -daystart -mtime +2 -exec rm {} \;
 
 url="http://$inverterip/js/status.js"
 
@@ -77,11 +84,13 @@ url="http://$inverterip/js/status.js"
 content=$(curl -s --connect-timeout 20 --retry 3 --retry-connrefused --retry-delay 2 --max-time 120 $url | tr ';' '\n' | grep -e "^myDeviceArray\[0\]" | sed -e 's/"//g' | sed 's/myDeviceArray\[0\] = //')
 
 if [[ -z "$content" ]]; then
+	# sleep for 20 sec to give inventer some time to recover and answer.
+	sleep 20
     content=$(curl -s --connect-timeout 15 --retry 3 --retry-connrefused --retry-delay 2 --max-time 120 $url | tr ';' '\n' | grep -e "^myDeviceArray\[0\]" | sed -e 's/"//g' | sed 's/myDeviceArray\[0\] = //')
 fi
 
 if [[ -z "$content" ]]; then
-	curl "https://wirepusher.com/send?id=$wirepusherid&title=Omnik%20PVoutput%20Error&message=Data%20content%20is%20empty%20quiting%20script&type=pverror&message_id=15"
+	curl "https://wirepusher.com/send?id=$wpid&title=Omnik%20PVoutput%20Error&message=Data%20content%20is%20empty%20quiting%20script&type=pverror&message_id=15"
     exit 1
 fi
 
@@ -92,6 +101,9 @@ IFS=","; declare -a Array=($*)
 # NLDNXXXXXXXXXXXX,NL1-V1.0-XXXX-4,V2.0-XXXX,omnikXXXXtl ,X000,1070,790,160839,,1,
 
 auth="sid=$sid&key=$key"
+
+powertoday=$((Array[6]*1*10))
+echo "total power today $powertoday"
 
 # if power value from inverter is 0
 if (( ${Array[5]} == 0 )); then
@@ -106,4 +118,4 @@ fi
 #all normal run postdata function.
 getweather
 postdata
-# END
+exit
