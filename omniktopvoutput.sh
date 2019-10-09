@@ -1,11 +1,13 @@
 #!/bin/bash
 #
+full_path=$(realpath $0)
+dir=$(dirname $full_path)
 # Variables
-# Set wirepush id 
+# Set wirepusher id 
 wpid=xxxx
-zerocheck=/opt/omnik/.zerocheck #used to check for lastupdate in case of zero output.
+zerocheck="$dir/.zerocheck" #used to check for lastupdate in case of zero output.
 inverterip=10.10.32.1
-logpath=/mnt/USB16GB/omnik/logs
+logpath="$dir/logs" #change path to folder for logs
 # please change with correct sid and key from pvoutput.org account
 sid=99999
 key=c393599e8251e497da5c51c9xxxxxxxxxxxxxxxx
